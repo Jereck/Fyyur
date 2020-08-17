@@ -208,9 +208,6 @@ def delete_venue(venue_id):
     flash(f'An error has occurred. The venue could not be deleted. ID = [{venue_id}]')
   if not error:
     flash(f'Venue was successfully deleted! ID = [{venue_id}]')
-
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
   return redirect(url_for('index'))
 
 #  Artists
