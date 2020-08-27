@@ -49,6 +49,8 @@ app.jinja_env.filters['datetime'] = format_datetime
 # Controllers.
 #----------------------------------------------------------------------------#
 
+#TODO: (Future) Possibly separate out routes into a route folder, and by Artist, Venue, and Show?
+
 @app.route('/')
 def index():
   return render_template('pages/home.html')
@@ -59,9 +61,11 @@ def index():
 
 @app.route('/venues')
 def venues():
+  # Get's all areas
   get_all_areas = Venue.query.with_entities(func.count(Venue.id), Venue.city, Venue.state).group_by(Venue.city, Venue.state).all()
   data = []
   
+  # Iterates through the areas, and appends each one to the proper city when rendered
   for area in get_all_areas:
     venues_in_area = Venue.query.filter_by(state=area.state).filter_by(city=area.city).all()
     venue_data = []
@@ -104,9 +108,11 @@ def show_venue(venue_id):
   if not venue:
     return render_template('errors/404.html')
   
+  # Gets upcoming shows, and joins Artist
   query_uc_shows = db.session.query(Show).join(Artist).filter(Show.venue_id==venue_id).filter(Show.start_time>datetime.now()).all()
   uc_shows = []
 
+  # Gets past shows, and joins Artist
   query_past_shows = db.session.query(Show).join(Artist).filter(Show.venue_id==venue_id).filter(Show.start_time<datetime.now()).all()
   past_shows = []
 
@@ -126,6 +132,7 @@ def show_venue(venue_id):
       "start_time": show.start_time.strftime("%Y - %m - %d %H:%M:%S")
     })
   
+  # Formats the data to be sent to front end
   data = {
     "id": venue.id,
     "name": venue.name,
@@ -185,9 +192,9 @@ def create_venue_submission():
     db.session.close()
 
   if error:
-    flash('There was an error when trying to add Venue [' + request.form['name'] + '].')
+    flash('There was an error when trying to create the Venue [' + request.form['name'] + '].')
   if not error:
-    flash('Venue [' + request.form['name'] + '] was successfully added')
+    flash('Venue [' + request.form['name'] + '] was successfully created!')
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
@@ -245,8 +252,13 @@ def show_artist(artist_id):
   if not artist_query:
     return render_template('errors/404.html')
   
+  # Gets the past shows for each artist and joins the Venue
   query_past_shows = db.session.query(Show).join(Venue).filter(Show.artist_id==artist_id).filter(Show.start_time<datetime.now()).all()
+
+  # Gets the upcoming shows for each artist and joins the Venue
   query_uc_shows = db.session.query(Show).join(Venue).filter(Show.artist_id==artist_id).filter(Show.start_time>datetime.now()).all()
+
+  # Create empty lists for upcoming and past shows
   past_shows = []
   uc_shows = []
 
@@ -266,6 +278,7 @@ def show_artist(artist_id):
       "start_time": show.start_time.strftime("%Y - %m - %d %H:%M:%S")
     })
 
+  # Formats data to be pushed to the front end
   data = {
     "id": artist_query.id,
     "name": artist_query.name,
@@ -345,6 +358,7 @@ def edit_venue(venue_id):
   form = VenueForm()
   venue = Venue.query.get(venue_id)
   
+  # If there is an venue, populate the form fields
   if venue:
     form.name.data = venue.name
     form.city.data = venue.city
@@ -387,9 +401,9 @@ def edit_venue_submission(venue_id):
     db.session.close()
 
   if error:
-    flash(f'An error occurred and Venue could not be changed')
+    flash('An error occurred and Venue could not be changed')
   if not error:
-    flash(f'Venue was successfully updated')
+    flash('Venue was successfully updated')
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist

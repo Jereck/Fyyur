@@ -7,6 +7,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 
 # Connect to the database
-
-SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:Stella1011!@localhost:5432/fyyur'
+# Replaced my actual password with <password> to hide my super secret password
+SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:<password>@localhost:5432/fyyur'
 SQLALCHEMY_TRACK_MODIFICATIONS = False

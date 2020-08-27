@@ -110,6 +110,7 @@ class VenueForm(FlaskForm):
     )
     phone = StringField(
         'phone',
+        # Regex pattern taken from Stackoverflow help: https://stackoverflow.com/questions/19715303/regex-that-accepts-only-numbers-0-9-and-no-characters
         validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should contain ONLY digits")]
     )
     genres = SelectMultipleField(
@@ -146,6 +147,7 @@ class ArtistForm(FlaskForm):
     )
     phone = StringField(
         'phone',
+        # Regex pattern taken from Stackoverflow help: https://stackoverflow.com/questions/19715303/regex-that-accepts-only-numbers-0-9-and-no-characters
         validators=[DataRequired(), Regexp("^[0-9]*$", message="Phone number should contain ONLY digits")]
     )
     image_link = StringField(
