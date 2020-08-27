@@ -403,17 +403,28 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   try:
-    form = AristForm()
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    phone = request.form['phone']
+    genres = request.form.getlist('genres'),
+    facebook_link = request.form['facebook_link']
+    image_link = request.form['image_link']
+    website = request.form['website']
+    seeking_venue = True if 'seeking_venue' in request.form else False
+    seeking_description = request.form['seeking_description']
 
     artist = Artist(
-      name=form.name.data,
-      city=form.city.data,
-      state=form.state.data,
-      phone=form.phone.data,
-      genres=form.genres.data,
-      image_link=form.image_link.data,
-      facebook_link=form.facebook_link.data,
+      name=name,
+      city=city,
+      state=state,
+      phone=phone,
+      genres=genres,
+      website = website,
+      image_link=image_link,
+      facebook_link=facebook_link,
     )
+
     db.session.add(artist)
     db.session.commit()
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
@@ -424,7 +435,7 @@ def create_artist_submission():
     db.session.close()
   return render_template('pages/home.html')
 
-@route('/artist/<artist_id>', methods=['DELETE'])
+@app.route('/artist/<artist_id>', methods=['DELETE'])
 def delete_artist(artist_id):
   try:
     artist = Artist.query.get(artist_id)
@@ -446,11 +457,11 @@ def delete_artist(artist_id):
 
 @app.route('/shows')
 def shows():
-  shows = Show.query.order_by(db.desc(Show.start_time))
+  show_query = db.session.query(Show).join(Artist).join(Venue).all()
 
   data = []
 
-  for show in shows:
+  for show in show_query:
     data.append({
       "venue_id": show.venue_id,
       "venue_name": show.venue.name,
@@ -481,10 +492,11 @@ def create_show_submission():
     flash('Show was successfully added')
   except:
     db.session.rollback()
+    print(sys.exc_info())
     flash('An error has occured. Show could not be added')
   finally:
     db.session.close()
-    
+
   return render_template('pages/home.html')
 
 @app.errorhandler(404)
